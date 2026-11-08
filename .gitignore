@@ -7,3 +7,4 @@ results/
 !.env.example
 *.log
 .DS_Store
+*.kate-swp

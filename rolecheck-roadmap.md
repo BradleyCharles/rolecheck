@@ -103,7 +103,7 @@ These are non-negotiable rules for the whole project. Put them in `docs/accuracy
 ### Tech stack
 | Concern | Choice | Reason |
 |---|---|---|
-| Language | TypeScript, Node 24 LTS | Matches your stack |
+| Language | TypeScript, Node 26 (Active LTS), CI also tests Node 24 | Longest support window; 24 is still common among users |
 | CLI framework | `commander` | Mature, well documented |
 | Spec validation | `zod` (+ `zod-to-json-schema` for editor autocomplete) | Typed, good errors |
 | Auth for test users | `@supabase/supabase-js` | Real sign-in flow |
@@ -126,7 +126,7 @@ Each phase has tasks, a deliverable, and **exit criteria**. Do not start the nex
 **Environment**
 - [ ] Install Docker Engine on Nobara from Docker's Fedora repo (native DNF, not Flatpak). Follow Docker's "Install Docker Engine on Fedora" page **[verify]**, then `sudo systemctl enable --now docker` and add yourself to the `docker` group (log out and back in).
 - [ ] Confirm: `docker run hello-world`
-- [ ] Node 24 LTS installed; `node -v`
+- [ ] Node 26 installed for development (`.nvmrc` = 26); Node 24 also installed for local cross-checks; `node -v`
 - [ ] Supabase CLI as a project dev dependency: `npm i -D supabase`, then `npx supabase --version`
 - [ ] Podman note: Supabase CLI expects the Docker API. Use Docker Engine to avoid compatibility issues.
 
@@ -449,11 +449,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [24, 26]       # test both supported Node lines
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       - run: npm run lint
@@ -487,7 +491,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
           cache: npm
 
       - run: npm ci
@@ -595,7 +599,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
           registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm test
@@ -633,7 +637,7 @@ jobs:
       - run: supabase start
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
       - uses: <your-github-username>/rolecheck@v0
         with:
           spec: rolecheck.yaml
